@@ -1,18 +1,51 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "@raghvendra_04/create-my-project",
+  "version": "1.0.3",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "create-my-project": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc -b",
     "start": "node dist/index.js",
-    "dev": "nodemon --ext ts --exec 'ts-node src/index.ts'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dhakarRaghu/WebGenie.git"
+  },
+  "keywords": [
+    "cli",
+    "project-generator",
+    "starter-kit",
+    "typescript",
+    "prisma"
+  ],
+  "author": "Raghvendra Singh Dhakad",
+  "license": "MIT",
+  "description": "A CLI tool to generate pre-configured web development starter kits.",
   "devDependencies": {
-    "ts-node": "^10.9.2"
+    "@types/chalk-animation": "^1.6.3",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.13.4",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "chalk": "^5.4.1",
+    "chalk-animation": "^2.0.3",
+    "inquirer": "^12.4.2",
+    "prisma": "^6.3.1",
+    "fs-extra": "^11.2.0"
   }
 }
