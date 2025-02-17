@@ -5,7 +5,9 @@ import { execSync } from "child_process";
 import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
-import { setPrismaNextAuth } from "../database/nextauthPrisma.js";
+import { setPrismaNextAuth } from "../authentication/nextauthPrisma.js";
+import { setNextAuthLibs } from "../authentication/nextLibs.js";
+import { setBetterEnv } from "../authentication/better/envBetter.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,8 +41,7 @@ export default async function welcome(): Promise<void> {
             type: "list",
             name: "auth",
             message: "Do you want authentication?",
-            choices: (answers) => answers.projectFrame === "Nextjs" ? ["NextAuth", "None"] : ["None"],
-            default: "None",
+            choices: (answers) => answers.projectFrame === "Nextjs" ? ["NextAuth", "BetterAuth" , "None"] : ["None"],
         },
     ]);
 
@@ -52,80 +53,36 @@ export default async function welcome(): Promise<void> {
             execSync(`npx create-next-app ${projectName}`, { stdio: "inherit" });
     
             if (auth === "NextAuth") {
-                console.log(chalk.yellow("\nSetting up NextAuth... ⏳"));
-                
+              console.log(chalk.yellow("\nSetting up NextAuth... ⏳"));
+              try{
                 await setPrismaNextAuth({ projectName });
                 // Install dependencies
                 execSync(`cd ${projectName} && npm install next-auth @prisma/client @next-auth/prisma-adapter`, { stdio: "inherit" });
-    
-                // Create necessary files
-
                 const up = projectName + "/src" ; 
                 const authPath = path.join(process.cwd(), up, "lib");
-                fs.ensureDirSync(authPath);
-                fs.writeFileSync(
-                    path.join(authPath, "db.ts"),
-                    `import { PrismaClient } from "@prisma/client";\n
-                    declare global {\n var prisma: PrismaClient | undefined;\n }\n
-                    export const prisma = global.prisma || new PrismaClient();\n
-                    if (process.env.NODE_ENV !== "production") {\n global.prisma = prisma;\n }`
-                );
-    
-                fs.writeFileSync(
-                    path.join(authPath, "auth.ts"),
-                    `import { getServerSession, type DefaultSession, type NextAuthOptions } from "next-auth";
-                    import { PrismaAdapter } from "@next-auth/prisma-adapter";
-                    import GoogleProvider from "next-auth/providers/google";
-                    import GithubProvider from "next-auth/providers/github";
-                    import { prisma } from "./db";\n
-                    declare module "next-auth" {\n
-                      interface Session extends DefaultSession {\n
-                        user: { id: string; credits: number } & DefaultSession["user"];
-                      }\n
-                    }\n
-                    declare module "next-auth/jwt" {\n
-                      interface JWT {\n
-                        id: string;\n
-                        credits: number;\n
-                      }\n
-                    }\n
-                    export const authOptions: NextAuthOptions = {
-                      session: { strategy: "jwt" },
-                      callbacks: {
-                        async jwt({ token, user }) {
-                          if (user) {
-                            token.id = user.id;
-                            token.credits = (user as any).credits || 0;
-                          }
-                          return token;
-                        },
-                        async session({ session, token }) {
-                          if (token && session.user) {
-                            session.user.id = token.id;
-                            session.user.credits = token.credits;
-                          }
-                          return session;
-                        },
-                      },
-                      adapter: PrismaAdapter(prisma),
-                      providers: [
-                        GithubProvider({
-                          clientId: process.env.GITHUB_CLIENT_ID!,
-                          clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-                        }),
-                        GoogleProvider({
-                          clientId: process.env.GOOGLE_CLIENT_ID!,
-                          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-                        }),
-                      ],
-                      pages: { signIn: "/login" },
-                      secret: process.env.NEXTAUTH_SECRET,
-                    };
-                    export const getAuthSession = () => getServerSession(authOptions);`
-                );
-    
-                console.log(chalk.green("\n✅ NextAuth setup complete!\n"));
+                 await setNextAuthLibs({ authPath });
+                 console.log(chalk.green("\n✅ NextAuth setup complete!\n"));
+              }
+              catch(error){
+                console.error(chalk.red("\n❌ Error setting up NextAuth: "), error);
+              }
             }
+            else if(auth === "BetterAuth"){
+                console.log(chalk.yellow("\nSetting up BetterAuth... ⏳"));
+                try{
+                    // Install dependencies
+                    execSync(`cd ${projectName} && npm install betterauth`, { stdio: "inherit" });
+          
+                    await setBetterEnv();
+                    
+                    console.log(chalk.green("\n✅ BetterAuth setup complete!\n"));
+                }
+                catch(error){
+                    console.error(chalk.red("\n❌ Error setting up BetterAuth: "), error);
+                }
+            }
+
+
         } else if (projectFrame === "T3-app") {
             console.log(chalk.green(`\nYou chose T3-app! 🚀`));
             execSync(`npx create-t3-app ${projectName}`, { stdio: "inherit" });
