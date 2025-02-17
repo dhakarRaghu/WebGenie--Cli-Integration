@@ -86,4 +86,5 @@ public/
 .DS_Store
 
 # WebStorm files
-dist/
+.dist/
+.npmignore
