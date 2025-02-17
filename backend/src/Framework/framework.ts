@@ -9,9 +9,20 @@ import { setNextAuthLibs } from "../authentication/nextLibs.js";
 import { setBetterEnv } from "../authentication/better/envBetter.js";
 import { setBetterAuth } from "../authentication/better/betterAuth.js";
 import { setBetterLogin } from "../authentication/better/betterLogin.js";
+import { setupDatabase } from "../database/prisma.js";
+import { setPrismaBetter } from "../authentication/better/setPrismaBetter.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+interface RunInProjectParams {
+  cmd: string;
+  projectName: string;
+}
+
+const runInProject = ({ cmd, projectName }: RunInProjectParams): void => {
+  execSync(cmd, { stdio: "inherit", cwd: projectName });
+};
 
 const sleep = (ms: number = 2000) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -69,18 +80,18 @@ export default async function welcome(): Promise<void> {
               }
             }
             else if(auth === "BetterAuth"){
-                console.log(chalk.yellow("\nSetting up BetterAuth... ⏳"));
+                console.log(chalk.yellow(`"\nSetting up BetterAuth...  ⏳" ${projectName}`));
                 try{
-                    // Install dependencies
-                    execSync(`cd ${projectName} && npm install betterauth`, { stdio: "inherit" });
-          
-                    await setBetterEnv();
+                    console.log(chalk.green(process.cwd()));
+                    await setPrismaBetter({ projectName });
+                    await setBetterEnv({projectName});
+
                     const up = projectName + "/src" ; 
                     const authPath = path.join(process.cwd(), up, "lib");
                     await setBetterAuth({ authPath });
-                    execSync(`npx @better-auth/cli generate`, { stdio: "inherit" });
-                    
-                    console.log(chalk.green("\n✅ Your schema is also generated, NOw you can migrate your schema!\n"));
+                  
+                    runInProject({ cmd: `npx @better-auth/cli generate`, projectName });
+                    console.log(chalk.green("\n✅ Your schema is also generated, Now you can migrate your schema!\n"));
 
                     console.log(chalk.green("\n✅ Wants to create your login page ?!\n"));
                     const { login } = await inquirer.prompt(
@@ -92,13 +103,15 @@ export default async function welcome(): Promise<void> {
                       },
                     );
                     if(login === "Yes"){
-                      const nextPath = projectName + "/src/app" ;
+                      const nextPath =  `${projectName}/src/` ;
                       console.log(chalk.green("\n✅ For Components we are installing Shadcn library"));
-                      execSync(`npx shadcn@latest init -d`, { stdio: "inherit" });
-                      execSync(`npx shadcn@latest add button`, { stdio: "inherit" });
-                      execSync(`npx shadcn@latest add card`, { stdio: "inherit" });
-                      const loginPath = path.join(process.cwd(), nextPath, "login");
-                       await setBetterLogin({ loginPath });
+                      const loginPath = path.join(process.cwd(), nextPath, "app");
+
+                      await setBetterLogin({ loginPath });
+
+                      runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
+                      runInProject({ cmd: `npx shadcn@latest add button`, projectName });
+                      runInProject({ cmd: `npx shadcn@latest add card`, projectName });
                       
                     }
 

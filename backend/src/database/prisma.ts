@@ -8,9 +8,8 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-export async function setupDatabase(): Promise<void> {
-    const { db }: { db: "MongoDB" | "PostgreSQL" | "MySQL" | "Prisma" } = await inquirer.prompt([
+export async function setupDatabase() {
+    const { db } = await inquirer.prompt([
         {
             type: "list",
             name: "db",
@@ -23,10 +22,10 @@ export async function setupDatabase(): Promise<void> {
 
     if (db === "Prisma") {
         console.log(chalk.yellow("\nSetting up Prisma... ⏳"));
-
         const projectPath = process.cwd();
-        console.log(chalk.red(`\n ${projectPath}! 🚀`));
-        execSync(`cd ${projectPath} && npm install prisma @prisma/client`, { stdio: "inherit" });
+        console.log(chalk.red(`\n${projectPath} 🚀`));
+
+        execSync(`npm install prisma @prisma/client`, { stdio: "inherit", cwd: projectPath });
 
         const prismaSchema = `
         datasource db {

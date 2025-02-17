@@ -29,8 +29,8 @@ export function setupDatabase() {
         if (db === "Prisma") {
             console.log(chalk.yellow("\nSetting up Prisma... ⏳"));
             const projectPath = process.cwd();
-            console.log(chalk.red(`\n ${projectPath}! 🚀`));
-            execSync(`cd ${projectPath} && npm install prisma @prisma/client`, { stdio: "inherit" });
+            console.log(chalk.red(`\n${projectPath} 🚀`));
+            execSync(`npm install prisma @prisma/client`, { stdio: "inherit", cwd: projectPath });
             const prismaSchema = `
         datasource db {
           provider = "postgresql"

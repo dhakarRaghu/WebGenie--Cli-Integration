@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { setupDatabase } from "./database/prisma.js";
 import welcome from "./Framework/framework.js";
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +21,7 @@ function main() {
         //     }
         //     process.exit(1); // Exit with failure
         // }
-        yield setupDatabase();
+        // await setupDatabase();
     });
 }
 main();

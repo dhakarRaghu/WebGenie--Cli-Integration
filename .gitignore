@@ -2,6 +2,7 @@
 node_modules/
 npm-debug.log
 
+
 # Logs
 logs/
 *.log
@@ -83,3 +84,6 @@ public/
 
 # MacOS files
 .DS_Store
+
+# WebStorm files
+dist/

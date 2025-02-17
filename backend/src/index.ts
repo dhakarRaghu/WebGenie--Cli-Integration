@@ -16,7 +16,7 @@ async function main(): Promise<void> {
     //     }
     //     process.exit(1); // Exit with failure
     // }
-    await setupDatabase();
+    // await setupDatabase();
 }
 
 main();
