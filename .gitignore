@@ -87,5 +87,8 @@ public/
 
 # WebStorm files
 
-dist/
+/dist
 .npmignore
+
+# Ignore build output
+dist/

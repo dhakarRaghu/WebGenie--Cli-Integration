@@ -3,14 +3,15 @@ import chalk from "chalk";
 import chalkAnimation from "chalk-animation";
 import { execSync } from "child_process";
 import path from "path";
+import fs from "fs-extra";
 import { fileURLToPath } from "url";
 import { setPrismaNextAuth } from "../authentication/nextauthPrisma.js";
 import { setNextAuthLibs } from "../authentication/nextLibs.js";
 import { setBetterEnv } from "../authentication/better/envBetter.js";
 import { setBetterAuth } from "../authentication/better/betterAuth.js";
 import { setBetterLogin } from "../authentication/better/betterLogin.js";
-import { setupDatabase } from "../database/prisma.js";
 import { setPrismaBetter } from "../authentication/better/setPrismaBetter.js";
+import { setFrontPage } from "./frontpage.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +64,7 @@ export default async function welcome(): Promise<void> {
         if (projectFrame === "Nextjs") {
             console.log(chalk.green(`\nYou chose Nextjs! 🚀`));
             execSync(`npx create-next-app ${projectName}`, { stdio: "inherit" });
+            await setFrontPage({ frontpagePath: projectName });
     
             if (auth === "NextAuth") {
               console.log(chalk.yellow("\nSetting up NextAuth... ⏳"));
@@ -82,18 +84,66 @@ export default async function welcome(): Promise<void> {
             else if(auth === "BetterAuth"){
                 console.log(chalk.yellow(`"\nSetting up BetterAuth...  ⏳" ${projectName}`));
                 try{
+                    runInProject({ cmd: `npm install better-auth`, projectName });
                     console.log(chalk.green(process.cwd()));
-                    await setPrismaBetter({ projectName });
+
+                    const { db }: { db: "Prisma" | "drizzle" | "None"} = await inquirer.prompt([
+                        {
+                            type: "list",
+                            name: "db",
+                            message: "Please choose a database :",
+                            choices: ["Prisma" , "drizzle" , "None"],
+                        },
+                    ]);
+                
+                    console.log(chalk.green(`\nYou chose ${db}! 🚀`));
+                    if(db === "Prisma"){
+                        await setPrismaBetter({ projectName });
+                    }
+                    else if(db === "drizzle"){
+                        try{
+                            runInProject({ cmd: `npm i drizzle-orm @neondatabase/serverless dotenv`, projectName });
+                            runInProject({ cmd: `npm i -D drizzle-kit tsx`, projectName });
+                            const path1 = path.join(process.cwd(), projectName);
+                             fs.writeFileSync(
+                                        path.join(path1, "drizzle.config.ts"),
+                                        `
+import { config } from 'dotenv';
+import { defineConfig } from 'drizzle-kit';
+
+config({ path: '.env' });
+
+export default defineConfig({
+  out: './drizzle',
+  schema: './auth-schema.ts',
+  dialect: 'postgresql',
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+});
+                                        `)
+                        }
+                        catch(error){
+                            console.error(chalk.red("\n❌ Error setting up Drizzle: "), error);
+                        }
+
+                    }
+                    else{
+                        console.log(chalk.red("No database selected"));
+                    }
                     await setBetterEnv({projectName});
 
                     const up = projectName + "/src" ; 
                     const authPath = path.join(process.cwd(), up, "lib");
-                    await setBetterAuth({ authPath });
-                  
+                    await setBetterAuth({ authPath , db });
+                  if(db === "Prisma"){
                     runInProject({ cmd: `npx @better-auth/cli generate`, projectName });
                     console.log(chalk.green("\n✅ Your schema is also generated, Now you can migrate your schema!\n"));
-
-                    console.log(chalk.green("\n✅ Wants to create your login page ?!\n"));
+                  }
+                  else{
+                    console.log(chalk.blue("\n✅ Load your .env file then run!\n npx @better-auth/cli generate to generate schema!! \n "))
+                  }
+                    console.log(chalk.green("\n✅ Wants to create your login page ?!\n "));
                     const { login } = await inquirer.prompt(
                       {
                           type: "list",
@@ -112,7 +162,27 @@ export default async function welcome(): Promise<void> {
                       runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
                       runInProject({ cmd: `npx shadcn@latest add button`, projectName });
                       runInProject({ cmd: `npx shadcn@latest add card`, projectName });
+
                       
+                    }
+                    else{
+                        const { components } = await inquirer.prompt(
+                            {
+                                type: "list",
+                                name: "components",
+                                message: "Initialize Shadcn ?",
+                                choices: ["Yes", "No"],
+                            },
+                        )
+                        if(components === "Yes"){
+                            runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
+                            runInProject({ cmd: `npx shadcn@latest add button`, projectName });
+                            runInProject({ cmd: `npx shadcn@latest add card`, projectName });
+                        }
+                        else{
+                            console.log(chalk.red("No components added"));
+                        }
+
                     }
 
                 }
