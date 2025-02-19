@@ -1,47 +1,35 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
+
 const __filename = fileURLToPath(import.meta.url);
-export function setBetterLogin(props) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { loginPath, AuthProvider } = props;
-        if (AuthProvider === "BetterAuth") {
-            const routePath1 = path.join(loginPath, "api");
-            const routePath2 = path.join(routePath1, "auth");
-            const routePath3 = path.join(routePath2, "[...all]");
-            fs.ensureDirSync(routePath3);
-            fs.writeFileSync(path.join(routePath3, "route.ts"), `
+
+interface Props {
+    loginPath : string;
+}
+
+export async function setBetterLogin(props : Props) : Promise<void>{
+    const { loginPath } = props;
+
+    const routePath1 = path.join(loginPath, "api");
+    const routePath2 = path.join(routePath1, "auth");
+    const routePath3 = path.join(routePath2, "[...all]");
+    fs.ensureDirSync(routePath3);
+    fs.writeFileSync(
+        path.join(routePath3, "route.ts"),
+        `
 import { auth } from "@/lib/auth"; 
 import { toNextJsHandler } from "better-auth/next-js";
         
 export const { POST, GET } = toNextJsHandler(auth);
-        `);
-        }
-        else {
-            const routePath1 = path.join(loginPath, "api");
-            const routePath2 = path.join(routePath1, "auth");
-            const routePath3 = path.join(routePath2, "[...nextauth]");
-            fs.ensureDirSync(routePath3);
-            fs.writeFileSync(path.join(routePath3, "route.ts"), `
-import { authOptions } from "@/lib/auth";
-import NextAuth from "next-auth/next";
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
-        `);
-        }
-        const routePath4 = path.join(loginPath, "login");
-        fs.ensureDirSync(routePath4);
-        fs.writeFileSync(path.join(routePath4, "page.tsx"), `
+        `
+    );
+    
+    const routePath4 = path.join(loginPath, "login");
+    fs.ensureDirSync(routePath4);
+    fs.writeFileSync(
+        path.join(routePath4, "page.tsx"),
+        `
 "use client"; // Marking as a client-side component
 import { useState } from "react";
 import { signIn } from "@/lib/auth-client"; // Import from BetterAuth
@@ -120,6 +108,6 @@ export default function LoginForm() {
   );
 }
 
-        `);
-    });
+        `
+    );
 }

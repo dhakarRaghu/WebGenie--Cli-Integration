@@ -72,13 +72,45 @@ export default function welcome() {
                         const authPath = path.join(process.cwd(), up, "lib");
                         yield setNextAuthLibs({ authPath });
                         console.log(chalk.green("\n✅ NextAuth setup complete!\n"));
+                        console.log(chalk.green("\n✅ Wants to create your login page ?!\n "));
+                        const { login } = yield inquirer.prompt({
+                            type: "list",
+                            name: "login",
+                            message: "Want us to create your login page ?",
+                            choices: ["Yes", "No"],
+                        });
+                        if (login === "Yes") {
+                            const nextPath = `${projectName}/src/`;
+                            console.log(chalk.green("\n✅ For Components we are installing Shadcn library"));
+                            const loginPath = path.join(process.cwd(), nextPath, "app");
+                            yield setBetterLogin({ loginPath, AuthProvider: auth });
+                            runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
+                            runInProject({ cmd: `npx shadcn@latest add button`, projectName });
+                            runInProject({ cmd: `npx shadcn@latest add card`, projectName });
+                        }
+                        else {
+                            const { components } = yield inquirer.prompt({
+                                type: "list",
+                                name: "components",
+                                message: "Initialize Shadcn ?",
+                                choices: ["Yes", "No"],
+                            });
+                            if (components === "Yes") {
+                                runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
+                                runInProject({ cmd: `npx shadcn@latest add button`, projectName });
+                                runInProject({ cmd: `npx shadcn@latest add card`, projectName });
+                            }
+                            else {
+                                console.log(chalk.red("No components added"));
+                            }
+                        }
                     }
                     catch (error) {
                         console.error(chalk.red("\n❌ Error setting up NextAuth: "), error);
                     }
                 }
                 else if (auth === "BetterAuth") {
-                    console.log(chalk.yellow(`"\nSetting up BetterAuth...  ⏳" ${projectName}`));
+                    console.log(chalk.yellow("\nSetting up BetterAuth...  ⏳"));
                     try {
                         runInProject({ cmd: `npm install better-auth`, projectName });
                         console.log(chalk.green(process.cwd()));
@@ -144,7 +176,7 @@ export default defineConfig({
                             const nextPath = `${projectName}/src/`;
                             console.log(chalk.green("\n✅ For Components we are installing Shadcn library"));
                             const loginPath = path.join(process.cwd(), nextPath, "app");
-                            yield setBetterLogin({ loginPath });
+                            yield setBetterLogin({ loginPath, AuthProvider: auth });
                             runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
                             runInProject({ cmd: `npx shadcn@latest add button`, projectName });
                             runInProject({ cmd: `npx shadcn@latest add card`, projectName });
@@ -170,6 +202,23 @@ export default defineConfig({
                         console.error(chalk.red("\n❌ Error setting up BetterAuth: "), error);
                     }
                 }
+                else {
+                    console.log(chalk.red("No authentication selected"));
+                    const { components } = yield inquirer.prompt({
+                        type: "list",
+                        name: "components",
+                        message: "Initialize Shadcn ?",
+                        choices: ["Yes", "No"],
+                    });
+                    if (components === "Yes") {
+                        runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
+                        runInProject({ cmd: `npx shadcn@latest add button`, projectName });
+                        runInProject({ cmd: `npx shadcn@latest add card`, projectName });
+                    }
+                    else {
+                        console.log(chalk.red("No components added"));
+                    }
+                }
             }
             else if (projectFrame === "T3-app") {
                 console.log(chalk.green(`\nYou chose T3-app! 🚀`));
@@ -184,6 +233,7 @@ export default defineConfig({
                 execSync(`npx @angular/cli new ${projectName}`, { stdio: "inherit" });
             }
             console.log(chalk.green(`\n✅ Project "${projectName}" is ready!\n`));
+            console.log(`\n🚀 cd ${projectName} \n npm run dev\n`);
         }
         catch (error) {
             console.error(chalk.red("\n❌ Error creating the project: "), error);
