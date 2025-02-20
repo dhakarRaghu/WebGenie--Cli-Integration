@@ -8,23 +8,24 @@ interface Props {
     loginPath : string;
 }
 
-export async function setBetterLogin(props : Props) : Promise<void>{
+export async function setNextLogin(props : Props) : Promise<void>{
     const { loginPath } = props;
 
     const routePath1 = path.join(loginPath, "api");
     const routePath2 = path.join(routePath1, "auth");
-    const routePath3 = path.join(routePath2, "[...all]");
+    const routePath3 = path.join(routePath2, "[...nextauth]");
     fs.ensureDirSync(routePath3);
     fs.writeFileSync(
         path.join(routePath3, "route.ts"),
         `
-import { auth } from "@/lib/auth"; 
-import { toNextJsHandler } from "better-auth/next-js";
-        
-export const { POST, GET } = toNextJsHandler(auth);
+import { authOptions } from "@/lib/auth";
+import NextAuth from "next-auth/next";
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
         `
     );
-    
+
     const routePath4 = path.join(loginPath, "login");
     fs.ensureDirSync(routePath4);
     fs.writeFileSync(
@@ -32,20 +33,21 @@ export const { POST, GET } = toNextJsHandler(auth);
         `
 "use client"; // Marking as a client-side component
 import { useState } from "react";
-import { signIn } from "@/lib/auth-client"; // Import from BetterAuth
+import { signIn } from "next-auth/react";
 import { Github, Chrome, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+ const [isLoading, setIsLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleOAuthSignIn = async (provider: "github" | "google") => {
     setIsLoading(true);
     try {
-      await signIn.social({
-        provider,
-        callbackURL: "/", // Redirect after successful login
+      await signIn(provider, {
+        callbackUrl: "/gallery", // Redirect after successful login
       });
     } catch (error) {
       console.error("OAuth sign-in error:", error);

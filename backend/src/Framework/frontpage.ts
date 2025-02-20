@@ -61,16 +61,16 @@ export async function setFrontPage(props : Props) : Promise<void>{
             </p>
             <div className="space-x-4">
                 <Link
-                href="/docs"
-                className="inline-block px-6 py-2 text-lg font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition"
-                >
-                Read Docs
-                </Link>
-                <Link
-                href="/dashboard"
+                href="https://web-genie-one.vercel.app/"
                 className="inline-block px-6 py-2 text-lg font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition"
                 >
                 Go to Dashboard
+                </Link>
+                 <Link
+                href="https://web-genie-one.vercel.app/docs"
+                className="inline-block px-6 py-2 text-lg font-medium bg-zinc-700 rounded hover:bg-zinc-600 transition"
+                >
+                Learn more
                 </Link>
             </div>
             <p className="text-sm text-gray-400 mt-6">

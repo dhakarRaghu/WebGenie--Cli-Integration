@@ -30,7 +30,6 @@ export function setPrismaNextAuth(props) {
         if (db === "Prisma") {
             console.log(chalk.yellow("\nSetting up Prisma... ⏳"));
             const projectPath = process.cwd() + `/${projectName}`;
-            console.log(chalk.red(`\n ${projectPath}! 🚀`));
             execSync(`cd ${projectPath} && npm install prisma @prisma/client`, { stdio: "inherit" });
             const prismaSchema = `
                 generator client {

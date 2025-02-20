@@ -12,6 +12,7 @@ import { setBetterAuth } from "../authentication/better/betterAuth.js";
 import { setBetterLogin } from "../authentication/better/betterLogin.js";
 import { setPrismaBetter } from "../authentication/better/setPrismaBetter.js";
 import { setFrontPage } from "./frontpage.js";
+import { setNextLogin } from "../authentication/NextLoginPage.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,9 +29,9 @@ const runInProject = ({ cmd, projectName }: RunInProjectParams): void => {
 const sleep = (ms: number = 2000) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default async function welcome(): Promise<void> {
-    const rainbowTitle = chalkAnimation.rainbow("What framework do you want? \n");
+    const rainbowTitle = chalkAnimation.rainbow("\n🚀 Welcome to WebGenie - Build your project in seconds! 🚀\n");
 
-    await sleep(500);
+    await sleep(1000);
     rainbowTitle.stop(); // Stop the animation
 
     const { name, projectName, projectFrame, auth } = await inquirer.prompt([
@@ -91,7 +92,7 @@ export default async function welcome(): Promise<void> {
                    console.log(chalk.green("\n✅ For Components we are installing Shadcn library"));
                    const loginPath = path.join(process.cwd(), nextPath, "app");
 
-                   await setBetterLogin({ loginPath ,AuthProvider : auth });
+                   await setNextLogin({ loginPath});
 
                    runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
                    runInProject({ cmd: `npx shadcn@latest add button`, projectName });
@@ -181,7 +182,7 @@ export default defineConfig({
                     console.log(chalk.green("\n✅ Your schema is also generated, Now you can migrate your schema!\n"));
                   }
                   else{
-                    console.log(chalk.blue("\n✅ Load your .env file then run!\n npx @better-auth/cli generate to generate schema!! \n "))
+                    console.log(chalk.blue("\n @Load your .env file then run!\n 'npx @better-auth/cli generate' to generate schema!! \n "))
                   }
                     console.log(chalk.green("\n✅ Wants to create your login page ?!\n "));
                     const { login } = await inquirer.prompt(
@@ -197,7 +198,7 @@ export default defineConfig({
                       console.log(chalk.green("\n✅ For Components we are installing Shadcn library"));
                       const loginPath = path.join(process.cwd(), nextPath, "app");
 
-                      await setBetterLogin({ loginPath ,AuthProvider : auth });
+                      await setBetterLogin({ loginPath });
 
                       runInProject({ cmd: `npx shadcn@latest init -d`, projectName });
                       runInProject({ cmd: `npx shadcn@latest add button`, projectName });
@@ -261,6 +262,7 @@ export default defineConfig({
             execSync(`npx @angular/cli new ${projectName}`, { stdio: "inherit" });
         }
         console.log(chalk.green(`\n✅ Project "${projectName}" is ready!\n`));
+        console.log(chalk.blue.bold("🚀 Check it out here: ") + chalk.underline("https://web-genie-one.vercel.app/\n"));
         console.log(`cd ${projectName} \n npm run dev\n`);
     }
     catch (error) {

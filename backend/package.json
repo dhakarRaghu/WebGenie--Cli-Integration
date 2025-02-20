@@ -1,6 +1,6 @@
 {
-  "name": "@raghvendra_04/create-my-project",
-  "version": "1.1.4",
+  "name": "start-my-project",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

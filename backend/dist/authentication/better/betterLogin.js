@@ -13,32 +13,17 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 export function setBetterLogin(props) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { loginPath, AuthProvider } = props;
-        if (AuthProvider === "BetterAuth") {
-            const routePath1 = path.join(loginPath, "api");
-            const routePath2 = path.join(routePath1, "auth");
-            const routePath3 = path.join(routePath2, "[...all]");
-            fs.ensureDirSync(routePath3);
-            fs.writeFileSync(path.join(routePath3, "route.ts"), `
+        const { loginPath } = props;
+        const routePath1 = path.join(loginPath, "api");
+        const routePath2 = path.join(routePath1, "auth");
+        const routePath3 = path.join(routePath2, "[...all]");
+        fs.ensureDirSync(routePath3);
+        fs.writeFileSync(path.join(routePath3, "route.ts"), `
 import { auth } from "@/lib/auth"; 
 import { toNextJsHandler } from "better-auth/next-js";
         
 export const { POST, GET } = toNextJsHandler(auth);
         `);
-        }
-        else {
-            const routePath1 = path.join(loginPath, "api");
-            const routePath2 = path.join(routePath1, "auth");
-            const routePath3 = path.join(routePath2, "[...nextauth]");
-            fs.ensureDirSync(routePath3);
-            fs.writeFileSync(path.join(routePath3, "route.ts"), `
-import { authOptions } from "@/lib/auth";
-import NextAuth from "next-auth/next";
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
-        `);
-        }
         const routePath4 = path.join(loginPath, "login");
         fs.ensureDirSync(routePath4);
         fs.writeFileSync(path.join(routePath4, "page.tsx"), `

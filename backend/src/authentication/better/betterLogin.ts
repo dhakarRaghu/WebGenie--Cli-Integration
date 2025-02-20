@@ -6,12 +6,11 @@ const __filename = fileURLToPath(import.meta.url);
 
 interface Props {
     loginPath : string;
-    AuthProvider : "BetterAuth" | "NextAuth";
 }
 
 export async function setBetterLogin(props : Props) : Promise<void>{
-    const { loginPath , AuthProvider } = props;
-    if(AuthProvider === "BetterAuth"){
+    const { loginPath } = props;
+
 
     const routePath1 = path.join(loginPath, "api");
     const routePath2 = path.join(routePath1, "auth");
@@ -26,23 +25,6 @@ import { toNextJsHandler } from "better-auth/next-js";
 export const { POST, GET } = toNextJsHandler(auth);
         `
     );
-  }
-  else{
-    const routePath1 = path.join(loginPath, "api");
-    const routePath2 = path.join(routePath1, "auth");
-    const routePath3 = path.join(routePath2, "[...nextauth]");
-    fs.ensureDirSync(routePath3);
-    fs.writeFileSync(
-        path.join(routePath3, "route.ts"),
-        `
-import { authOptions } from "@/lib/auth";
-import NextAuth from "next-auth/next";
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
-        `
-    );
-  }
     
     const routePath4 = path.join(loginPath, "login");
     fs.ensureDirSync(routePath4);
